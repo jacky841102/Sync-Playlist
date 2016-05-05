@@ -2,7 +2,7 @@ var path = require("path"),
     webpack = require("webpack"),
     ExtractTextPlugin = require("extract-text-webpack-plugin");
 
-const vendorModules = ["jquery", "lodash"];
+const vendorModules = ["jquery", "lodash", "socket.io-client", "rxjs"];
 const dirname = path.resolve("./");
 function createConfig(isDebug){
     const devTool = isDebug? "eval-source-map" : "source-map";
@@ -42,7 +42,7 @@ function createConfig(isDebug){
             loaders: [
                 {test: /\.js$/, loader: "babel", exclude: /node_modules/},
                 {test: /\.js$/, loader: "eslint", exclude: /node_modules/},
-                {test: /\.(png|jpg|jpeg|gif|woff|ttf|eof|svg|woff2)/, loader: "url-loader?limit=512"},
+                {test: /\.(png|jpg|jpeg|gif|woff|ttf|eot|svg|woff2)/, loader: "url-loader?limit=1024"},
                 cssLoader,
                 sassLoader
             ]

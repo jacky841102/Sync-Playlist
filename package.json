@@ -42,9 +42,12 @@
   },
   "dependencies": {
     "express": "^4.13.4",
+    "font-awesome": "^4.6.1",
     "jade": "^1.11.0",
     "jquery": "^2.2.3",
+    "rxjs": "^5.0.0-beta.6",
     "socket.io": "^1.4.5",
+    "socket.io-client": "^1.4.5",
     "source-map-support": "^0.4.0"
   }
 }
