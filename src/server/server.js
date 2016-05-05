@@ -8,6 +8,7 @@ import {ObservableSocket} from "shared/observable-socket";
 import {UsersModule} from "./modules/users";
 import {PlaylistModule} from "./modules/playlist";
 import {ChatModule} from "./modules/chat";
+import "shared/operators";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 

@@ -5,11 +5,7 @@ export class UsersModule extends ModuleBase {
     constructor(io) {
         super();
         this._io = io;
-        this._userList = [
-            {name: "Foo", color: this.getColorForUsername("Foo")},
-            {name: "Bar", color: this.getColorForUsername("Bar")},
-            {name: "Baz", color: this.getColorForUsername("Baz")}
-        ];
+        this._userList = [];
     }
 
     getColorForUsername(username) {
@@ -25,8 +21,15 @@ export class UsersModule extends ModuleBase {
     }
 
     registerClient(client) {
+        let index = 0;
+        setInterval(() => {
+            const username = `New user ${index++}`;
+            const user = {name: username, color: this.getColorForUsername(username)};
+            client.emit("users:added", user);
+        }, 2000);
+
         client.onActions({
-            "user:list": () => {
+            "users:list": () => {
                 return this._userList;
             }
         });
