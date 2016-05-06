@@ -5,11 +5,10 @@ export class ModuleBase {
         return Observable.empty();
     }
 
-    registerClient(client) {
 
+    registerClient(client) {
     }
 
     clientRegisted(client) {
-
     }
 }
