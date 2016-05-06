@@ -1,11 +1,18 @@
 import {ModuleBase} from "../lib/module";
+import {validateLogin} from "shared/validation/users";
+import {fail} from "shared/observable-socket";
+import {Observable} from "rxjs";
 import _ from "lodash";
+
+const AuthContext = Symbol("AuthContext");
+
 
 export class UsersModule extends ModuleBase {
     constructor(io) {
         super();
         this._io = io;
         this._userList = [];
+        this._users = {};
     }
 
     getColorForUsername(username) {
@@ -20,18 +27,71 @@ export class UsersModule extends ModuleBase {
         return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     }
 
-    registerClient(client) {
-        let index = 0;
-        setInterval(() => {
-            const username = `New user ${index++}`;
-            const user = {name: username, color: this.getColorForUsername(username)};
-            client.emit("users:added", user);
-        }, 2000);
+    getUserForClient(client) {
+        const auth = client[AuthContext];
+        if(!auth)
+            return null;
+        return auth.isLoggedIn? auth : null;
+    }
 
+    loginClient$(client, username) {
+        username = username.trim();
+
+        const validator = validateLogin(username);
+        if(!validator.isValid)
+            return validator.throw$();
+
+        if(this._users.hasOwnProperty(username))
+            return fail(`Username ${username} is already taken`);
+
+        const auth = client[AuthContext] || (client[AuthContext] = {});
+        if(auth.isLoggedIn)
+            return fail(`You are already logged in`);
+
+        auth.name = username;
+        auth.color = this.getColorForUsername(username);
+        auth.isLoggedIn = true;
+
+        this._users[username] = client;
+        this._userList.push(auth);
+
+        this._io.emit("users:added", auth);
+        console.log(`User ${username} logged in`);
+        return Observable.of(auth);
+
+    }
+    
+    logoutClient(client) {
+        const auth = this.getUserForClient(client);
+        if(!auth)
+            return;
+        const index = this._userList.indexOf(auth);
+        this._userList.splice(index, 1);
+        delete this._users[auth.name];
+        delete client[AuthContext];
+
+        this._io.emit("users:removed", auth);
+        console.log(`User ${auth.name} logged out`);
+
+    }
+
+    registerClient(client) {
         client.onActions({
             "users:list": () => {
                 return this._userList;
+            },
+
+            "auth:login": ({name}) => {
+                return this.loginClient$(client, name);
+            },
+
+            "auth:logout" : () => {
+                this.logoutClient(client);
             }
+        });
+
+        client.on("disconnect", () => {
+            this.logoutClient(client);
         });
     }
 
