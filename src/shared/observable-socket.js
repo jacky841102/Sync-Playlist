@@ -79,7 +79,6 @@ export class ObservableSocket {
             request.next(arg);
             request.complete();
         });
-
         this._socket.on(`${action}:fail`, (arg, id) => {
             const request = this._popRequest(id);
             if(!request)

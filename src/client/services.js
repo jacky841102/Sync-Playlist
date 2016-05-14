@@ -3,12 +3,14 @@ import io from "socket.io-client";
 import {ObservableSocket} from "shared/observable-socket";
 import {UsersStore} from "./stores/users";
 import {ChatStore} from "./stores/chat";
+import {PlaylistStore} from "./stores/playlist";
 
 export const socket = io({ autoConnect: false });
 export const server = new ObservableSocket(socket);
 //create socket wrapper
 
 //create plyaist store
+export const playlistStore = new PlaylistStore(server);
 
 //create user store
 export const usersStore = new UsersStore(server);

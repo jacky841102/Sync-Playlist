@@ -8,6 +8,8 @@ import {ObservableSocket} from "shared/observable-socket";
 import {UsersModule} from "./modules/users";
 import {PlaylistModule} from "./modules/playlist";
 import {ChatModule} from "./modules/chat";
+import {FileRepository} from "./repositories/file";
+import {YoutubeService} from "./services/youtube";
 import "shared/operators";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
@@ -59,9 +61,8 @@ app.get("/", (req, res) => {
 
 //-----------------
 //Services
-const videoServices = [];
-const playlistRepository = {};
-
+const videoServices = [new YoutubeService("AIzaSyCsUKKgaQsFAqrSXXpEegoHVcJ6ENXeBHw")];
+const playlistRepository = new FileRepository("./data/playlist.json");
 //-----------------
 //Modules
 const users = new UsersModule(io);
