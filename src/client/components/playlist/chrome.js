@@ -28,11 +28,11 @@ export class PlaylistChromeComponent extends ComponentBase{
         const $indicator = $(`<div class="playing-indicator" />`).appendTo(this._$mount);
         let lastSource;
         this._playlist.state$
-            .comSubscribe(this, ({state}) => {
+            .comSubscribe(this, ({state, type}) => {
             const source = state.current && state.current.source;
             if (!source)
                 return;
-            if (source == lastSource)
+            if (source == lastSource && type != "move")
                 return;
             lastSource = source;
             const index = state.list.indexOf(source);

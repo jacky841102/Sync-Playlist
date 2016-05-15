@@ -18,7 +18,7 @@ export class PlaylistListComponent extends ElementComponent{
         let itemsMap = {};
 
         //Children components
-        const sort = new PlaylistSortComponent();
+        const sort = new PlaylistSortComponent(this._playlist, this._users, this.$element);
         sort.attach(this._$mount);
         this.children.push(sort);
 
@@ -51,6 +51,14 @@ export class PlaylistListComponent extends ElementComponent{
             .comSubscribe(this, ({source}) => {
                 const comp = itemsMap[source.id];
                 this._removeItem(comp);
+            });
+
+        this._playlist.actions$
+            .filter(a => a.type === "move")
+            .comSubscribe(this, ({fromSource, toSource}) => {
+                const fromComp = itemsMap[fromSource.id];
+                const toComp = toSource? itemsMap[toSource.id] : null;
+                this._moveItem(fromComp, toComp);
             });
 
 
@@ -115,6 +123,31 @@ export class PlaylistListComponent extends ElementComponent{
                 comp.detach();
             });
     }
+
+    _moveItem(fromComp, toComp) {
+        const fromOffsetTop = fromComp.$element[0].offsetTop;
+        let distance = 0;
+
+        if (toComp){
+            const toOffsetTop = toComp.$element[0].offsetTop;
+            toComp.$element.after(fromComp.$element);
+
+            distance = fromOffsetTop - toOffsetTop;
+            if(toOffsetTop < fromOffsetTop)
+                distance -= fromComp.$element.height();
+        }else{
+            distance = fromOffsetTop;
+            this.$element.prepend(fromComp.$element);
+        }
+
+        fromComp.$element
+            .addClass("moving")
+            .css({top: distance})
+            .animate({top: 0}, 250, () => {
+                fromComp.$element.removeClass("moving")
+                    .css({top: ""});
+            });
+    }
 }
 
 class PlaylistItemComponent extends ElementComponent {
@@ -139,11 +172,11 @@ class PlaylistItemComponent extends ElementComponent {
         this._source = source;
 
         const $thumb = $(`<div class="thumb-wrapper" />`).append(
-            $(`<img class="thumb" />`).attr("src", source.thumb)
+            $(`<img class="thumb"/>`).attr("src", source.thumb)
         );
 
         const $details =
-            $(`<div class="detail /">`).append([
+            $(`<div class="detail"/>`).append([
                 $(`<span class="title" />`).attr("title", source.title).text(source.title),
                 $(`<time />`).text(moment.duration(source.totalTime, "seconds").format())
             ]);
